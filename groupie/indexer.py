@@ -32,12 +32,21 @@ def get_post_comments(post):
             comment.post = post
             yield comment
 
+BODY_KEYS = ('message', 'name', 'caption', 'description')
+
 def search(q):
     q = q.lower()
     for post in get_posts_by_ids(get_post_ids()):
-        if q in post.body.lower():
-            yield post
-        else:
+        found = False
+        for key in BODY_KEYS:
+            value = post.data.get(key)
+            if value:
+                if q in value.lower():
+                    yield post
+                    found = True
+                    break
+
+        if not found:
             for comment in get_post_comments(post):
                 if q in comment.message.lower():
                     yield comment

@@ -8,7 +8,7 @@
 </head>
 <body>
 {% macro print_post(post, show_comments=False) %}
-<p>{{ post.from.name }}: <span class="body">{{ post.body|urlize }}</span></p>
+<p>{{ post.from.name }}: <span class="body">{{ post.message|urlize }}</span></p>
 {% if show_comments %}
 <ul>
 {% for comment in post.comments %}
