@@ -34,9 +34,25 @@ def get_post_comments(post):
 
 BODY_KEYS = ('message', 'name', 'caption', 'description')
 
-def search(q):
+COMMENT_POP_WEIGHT = 2
+def popularity_func(obj):
+    if isinstance(obj, models.Comment):
+        obj = obj.post
+
+    return obj.like_count + obj.comment_count * COMMENT_POP_WEIGHT
+
+def search(q, sort):
+    g = search_gen(q, sort)
+    if sort == 'popular':
+        g = sorted(g, key=popularity_func, reverse=True)
+    return g
+
+def search_gen(q, sort):
     q = q.lower()
-    for post in get_posts_by_ids(get_post_ids()):
+    post_ids = get_post_ids()
+    if sort == 'new':
+        post_ids = reversed(post_ids)
+    for post in get_posts_by_ids(post_ids):
         found = False
         for key in BODY_KEYS:
             value = post.data.get(key)

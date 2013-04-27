@@ -61,6 +61,11 @@ def fetch_feed(initial_url=None):
             update_url = paging.get('previous')
     return update_url
 
+def fetch_info():
+    r = requests.get('https://graph.facebook.com/%s' % config.GROUP_ID)
+    with open(get_path('info'), 'w') as fp:
+        json.dump(r.json(), fp)
+
 def ensure_dir(*c):
     path = get_path(*c)
     try:
@@ -74,6 +79,7 @@ def main():
     ensure_dir()
     ensure_dir('posts')
     ensure_dir('comments')
+    fetch_info()
     update_pointer(fetch_feed(get_pointer()))
 
 if __name__ == '__main__':
