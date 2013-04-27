@@ -4,30 +4,31 @@ import urllib
 import requests
 
 import config
+from groupie import models
 from groupie.utils import get_path
 
-def get_pointer():
-    path = get_path('pointer')
+def get_pointer(group):
+    path = group.get_path('pointer')
     if os.path.exists(path):
         with open(path) as fp:
             return fp.read().strip()
     return None
 
-def update_pointer(ptr):
+def update_pointer(group, ptr):
     print 'Update pointer:', ptr
     if ptr is None:
         print 'Not updating...'
         return
-    with open(get_path('pointer'), 'w') as fp:
+    with open(group.get_path('pointer'), 'w') as fp:
         fp.write(ptr)
 
-def fetch_comments(post):
+def fetch_comments(group, post):
     comments = post.get('comments')
     if not comments: return
 
     while True:
         for comment in comments.get('data', ()):
-            comment_dir = ensure_dir('comments', post['id'])
+            comment_dir = ensure_dir(group.slug, 'comments', post['id'])
             with open(os.path.join(comment_dir, comment['id']), 'w') as fp:
                 json.dump(comment, fp)
 
@@ -37,16 +38,16 @@ def fetch_comments(post):
         print 'Fetching comments:', next_url
         comments = requests.get(next_url).json()
 
-def update_posts(posts):
+def update_posts(group, posts):
     for post in posts:
-        fetch_comments(post)
-        with open(get_path('posts', post['id']), 'w') as fp:
+        fetch_comments(group, post)
+        with open(group.get_path('posts', post['id']), 'w') as fp:
             json.dump(post, fp)
 
-def fetch_feed(initial_url=None):
+def fetch_feed(group, initial_url=None):
     if not initial_url:
         params = {'access_token': config.ACCESS_TOKEN, 'limit': str(100)}
-        initial_url = 'https://graph.facebook.com/%s/feed?%s' % (urllib.quote(config.GROUP_ID), urllib.urlencode(params))
+        initial_url = 'https://graph.facebook.com/%s/feed?%s' % (urllib.quote(group.id), urllib.urlencode(params))
 
     update_url = None
     url = initial_url
@@ -54,16 +55,16 @@ def fetch_feed(initial_url=None):
         print '*', url
         r = requests.get(url)
         data = r.json()
-        update_posts(data.get('data', []))
+        update_posts(group, data.get('data', []))
         paging = data.get('paging', {})
         url = paging.get('next')
         if update_url is None:
             update_url = paging.get('previous')
     return update_url
 
-def fetch_info():
-    r = requests.get('https://graph.facebook.com/%s' % config.GROUP_ID)
-    with open(get_path('info'), 'w') as fp:
+def fetch_info(group):
+    r = requests.get('https://graph.facebook.com/%s' % group.id)
+    with open(group.get_path('info'), 'w') as fp:
         json.dump(r.json(), fp)
 
 def ensure_dir(*c):
@@ -75,12 +76,23 @@ def ensure_dir(*c):
             raise
     return path
 
-def main():
-    ensure_dir()
-    ensure_dir('posts')
-    ensure_dir('comments')
-    fetch_info()
-    update_pointer(fetch_feed(get_pointer()))
+def main(group_slug):
+    print '** Fetching:', group_slug
+
+    try:
+        group = models.Group.get(group_slug)
+    except models.GroupNotFound:
+        group = models.Group({})
+        group.slug = group_slug
+        group.id = config.GROUPS[group_slug]
+
+    ensure_dir(group.slug)
+    ensure_dir(group.slug, 'posts')
+    ensure_dir(group.slug, 'comments')
+    fetch_info(group)
+    update_pointer(group, fetch_feed(group, get_pointer(group)))
+    print
 
 if __name__ == '__main__':
-    main()
+    for slug in config.GROUPS:
+        main(slug)

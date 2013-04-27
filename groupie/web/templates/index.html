@@ -75,8 +75,8 @@
 <div class="result">
 <div class="sort">
 Sort by:
-<a href="{{ url_for('index', q=q, sort='popular') }}"{% if sort == 'popular' %} class="active"{% endif %}>Popularity</a> 
-<a href="{{ url_for('index', q=q, sort='new') }}"{% if sort == 'new' %} class="active"{% endif %}>Date</a>
+<a href="{{ url_for('index', group_slug=group.slug, q=q, sort='popular') }}"{% if sort == 'popular' %} class="active"{% endif %}>Popularity</a> 
+<a href="{{ url_for('index', group_slug=group.slug, q=q, sort='new') }}"{% if sort == 'new' %} class="active"{% endif %}>Date</a>
 </div>
 
 {% for item in result %}

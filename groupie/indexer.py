@@ -2,7 +2,6 @@ import os
 import json
 
 from groupie import models
-from groupie.utils import get_path
 
 def get_ids(dir):
     if not os.path.exists(dir): return []
@@ -17,17 +16,19 @@ def get_ids(dir):
     files.sort(key=sort_key)
     return files
 
-def get_post_ids():
-    return get_ids(get_path('posts'))
+def get_post_ids(group):
+    return get_ids(group.get_path('posts'))
 
-def get_posts_by_ids(ids):
+def get_posts_by_ids(group, ids):
     for post_id in ids:
-        with open(get_path('posts', post_id)) as fp:
-            yield models.Post(json.load(fp))
+        with open(group.get_path('posts', post_id)) as fp:
+            post = models.Post(json.load(fp))
+            post.group = group
+            yield post
 
-def get_post_comments(post):
-    for comment_id in get_ids(get_path('comments', post.id)):
-        with open(get_path('comments', post.id, comment_id)) as fp:
+def get_post_comments(group, post):
+    for comment_id in get_ids(group.get_path('comments', post.id)):
+        with open(group.get_path('comments', post.id, comment_id)) as fp:
             comment = models.Comment(json.load(fp))
             comment.post = post
             yield comment
@@ -41,18 +42,18 @@ def popularity_func(obj):
 
     return obj.like_count + obj.comment_count * COMMENT_POP_WEIGHT
 
-def search(q, sort):
-    g = search_gen(q, sort)
+def search(group, q, sort):
+    g = search_gen(group, q, sort)
     if sort == 'popular':
         g = sorted(g, key=popularity_func, reverse=True)
     return g
 
-def search_gen(q, sort):
+def search_gen(group, q, sort):
     q = q.lower()
-    post_ids = get_post_ids()
+    post_ids = get_post_ids(group)
     if sort == 'new':
         post_ids = reversed(post_ids)
-    for post in get_posts_by_ids(post_ids):
+    for post in get_posts_by_ids(group, post_ids):
         found = False
         for key in BODY_KEYS:
             value = post.data.get(key)
@@ -63,24 +64,7 @@ def search_gen(q, sort):
                     break
 
         if not found:
-            for comment in get_post_comments(post):
+            for comment in get_post_comments(group, post):
                 if q in comment.message.lower():
                     yield comment
                     break
-
-if __name__ == '__main__':
-    posts_dir = get_path('posts')
-    for post_id in get_ids(posts_dir):
-        with open(get_path('posts', post_id)) as fp:
-            post = json.load(fp)
-            print 'posts/%s:' % post['id'],
-            msg = post.get('message') or post.get('description')
-            msg = u' '.join(msg.splitlines())
-            print '%s --%s' % (msg, post['from']['name'])
-
-            comment_dir = get_path('comments', post['id'])
-            for comment_id in get_ids(comment_dir):
-                with open(os.path.join(comment_dir, comment_id)) as cfp:
-                    comment = json.load(cfp)
-                    print 'comments/%s/%s:' % (post['id'], comment['id']),
-                    print '%s --%s' % (comment['message'], comment['from']['name'])

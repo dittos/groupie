@@ -1,4 +1,6 @@
 DEBUG = False
 ACCESS_TOKEN = ''
-GROUP_ID = ''
+GROUPS = {
+    # 'group slug': 'group id (facebook object id)',
+}
 DATA_DIR = './data'

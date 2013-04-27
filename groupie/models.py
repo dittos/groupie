@@ -1,3 +1,4 @@
+import os
 import datetime
 import json
 
@@ -18,15 +19,29 @@ class Base(object):
     def model(self):
         return self.__class__.__name__
 
+class GroupNotFound(Exception):
+    def __init__(self, slug):
+        super(GroupNotFound, self).__init__("Group not found: %s" % slug)
+        self.slug = slug
+
 class Group(Base):
     @property
     def link(self):
         return 'https://www.facebook.com/groups/%s/' % self.id
 
     @staticmethod
-    def get():
-        with open(get_path('info')) as fp:
-            return Group(json.load(fp))
+    def get(slug):
+        path = get_path(slug, 'info')
+        if not os.path.exists(path):
+            raise GroupNotFound(name)
+
+        with open(get_path(slug, 'info')) as fp:
+            group = Group(json.load(fp))
+            group.slug = slug
+            return group
+    
+    def get_path(self, *c):
+        return get_path(self.slug, *c)
 
 class Post(Base):
     @property
