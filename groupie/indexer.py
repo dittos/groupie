@@ -1,7 +1,7 @@
 import os
 import json
 
-from utils import get_path
+from groupie.utils import get_path
 
 def get_ids(dir):
     def sort_key(filename):

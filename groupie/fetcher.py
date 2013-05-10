@@ -4,7 +4,7 @@ import urllib
 import requests
 
 import config
-from utils import get_path
+from groupie.utils import get_path
 
 def get_pointer():
     path = get_path('pointer')
