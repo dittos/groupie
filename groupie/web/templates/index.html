@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Search{% if q %}: {{ q }}{% endif %}</title>
+    <style type="text/css">
+    .hl { background-color: yellow; }
+    </style>
+</head>
+<body>
+{% macro print_post(post, show_comments=False) %}
+<p>{{ post.from.name }}: <span class="body">{{ post.body|urlize }}</span></p>
+{% if show_comments %}
+<ul>
+{% for comment in post.comments %}
+    <li>{{ comment.from.name }}: <span class="body">{{ comment.message|urlize }}</span></li>
+{% endfor %}
+</ul>
+{% endif %}
+{% endmacro %}
+
+<form method="get" action="">
+{% if error %}
+    <p>{{ error }}</p>
+{% endif %}
+
+    <input type="search" size="30" name="q" value="{{ q }}"> <input type="submit" value="Search">
+</form>
+
+{% if result %}
+<div class="result">
+{% for item in result %}
+    <div class="item">
+    {% if item.model == 'Post' %}
+        {{ print_post(item) }}
+    {% elif item.model == 'Comment' %}
+        {{ print_post(item.post, show_comments=True) }}
+    {% endif %}
+    </div>
+{% endfor %}
+</div>
+
+<script src="//ajax.aspnetcdn.com/ajax/jquery/jquery-1.9.1.min.js"></script>
+<script type="text/javascript">
+var re = new RegExp({{ q|tojson|safe }}, 'gi');
+var repl = "<span class='hl'>$&</span>";
+$('.body').each(function() {
+	var cell = this;
+	if (cell.innerHTML.match(re))
+	{
+		var content = []
+		for (var j = 0; j < cell.childNodes.length; j++)
+		{
+			var node = cell.childNodes[j]
+			if (node.nodeType == 3)
+				content.push(node.nodeValue.replace(re, repl))
+			else if (node.nodeType == 1 && node.tagName == 'A') {
+				content.push('<a href="' + node.href + '">')
+				content.push(node.innerHTML.replace(re, repl))
+				content.push('</a>')
+			}
+		}
+		cell.innerHTML = content.join('')
+	}
+});
+</script>
+{% endif %}
+</body>
+</html>

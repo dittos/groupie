@@ -1,3 +1,4 @@
+DEBUG = False
 ACCESS_TOKEN = ''
 GROUP_ID = ''
 DATA_DIR = './data'
