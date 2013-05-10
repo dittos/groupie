@@ -26,12 +26,12 @@ def fetch_comments(post):
     if not comments: return
 
     while True:
-        for comment in comments['data']:
+        for comment in comments.get('data', ()):
             comment_dir = ensure_dir('comments', post['id'])
             with open(os.path.join(comment_dir, comment['id']), 'w') as fp:
                 json.dump(comment, fp)
 
-        next_url = comments['paging'].get('next')
+        next_url = comments.get('paging', {}).get('next')
         if not next_url:
             break
         print 'Fetching comments:', next_url

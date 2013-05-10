@@ -4,6 +4,8 @@ import json
 from groupie.utils import get_path
 
 def get_ids(dir):
+    if not os.path.exists(dir): return []
+
     def sort_key(filename):
         return map(int, filename.split('_'))
 
@@ -22,10 +24,10 @@ for post_id in get_ids(posts_dir):
         msg = post.get('message') or post.get('description')
         msg = u' '.join(msg.splitlines())
         print '%s --%s' % (msg, post['from']['name'])
-        if 'comments' in post:
-            comment_dir = get_path('comments', post['id'])
-            for comment_id in get_ids(comment_dir):
-                with open(os.path.join(comment_dir, comment_id)) as cfp:
-                    comment = json.load(cfp)
-                    print 'comments/%s/%s:' % (post['id'], comment['id']),
-                    print '%s --%s' % (comment['message'], comment['from']['name'])
+
+        comment_dir = get_path('comments', post['id'])
+        for comment_id in get_ids(comment_dir):
+            with open(os.path.join(comment_dir, comment_id)) as cfp:
+                comment = json.load(cfp)
+                print 'comments/%s/%s:' % (post['id'], comment['id']),
+                print '%s --%s' % (comment['message'], comment['from']['name'])
