@@ -107,7 +107,7 @@ Sort by:
 function escapeRegExp(str) {
     return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
 }
-var re = new RegExp(escapeRegExp({{ q|tojson|safe }}), 'gi');
+var re = new RegExp(escapeRegExp({{ q|escape|tojson|safe }}), 'gi');
 var repl = "<span class='hl'>$&</span>";
 $('.body').each(function() {
 	var cell = this;
@@ -118,7 +118,8 @@ $('.body').each(function() {
 		{
 			var node = cell.childNodes[j]
 			if (node.nodeType == 3)
-				content.push(node.nodeValue.replace(re, repl))
+			    // XXX: too hacky... :(
+				content.push($('<div />').text(node.nodeValue).html().replace(re, repl))
 			else if (node.nodeType == 1) {
 			    if (node.tagName == 'A')
                     node.innerHTML = node.innerHTML.replace(re, repl);
