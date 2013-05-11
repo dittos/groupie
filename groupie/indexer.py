@@ -1,8 +1,8 @@
 import os
-import json
 import itertools
 
 from groupie import models
+from groupie.utils import json
 
 def get_ids(dir):
     if not os.path.exists(dir): return []

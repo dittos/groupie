@@ -1,5 +1,10 @@
 import os
 
+try:
+    import ujson as json
+except ImportError:
+    import json
+
 import config
 
 def get_path(*c):

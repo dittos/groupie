@@ -1,9 +1,8 @@
 import os
 import datetime
-import json
 
 import config
-from groupie.utils import get_path
+from groupie.utils import get_path, json
 
 class Base(object):
     def __init__(self, data):
