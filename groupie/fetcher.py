@@ -56,9 +56,9 @@ def update_posts(group, posts):
             json.dump(post, fp)
 
 def fetch_feed(group, initial_url=None):
-    only_once = False
+    only_once = True
     if not initial_url:
-        only_once = True
+        only_once = False
         params = {'access_token': config.ACCESS_TOKEN, 'limit': str(100)}
         initial_url = 'https://graph.facebook.com/%s/feed?%s' % (urllib.quote(group.id), urllib.urlencode(params))
 
