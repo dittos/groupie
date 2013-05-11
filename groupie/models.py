@@ -65,10 +65,10 @@ class Post(Base):
     
     @property
     def original_link(self):
-        return 'https://www.facebook.com/groups/%s/posts/%s' % (config.GROUP_ID, self.id.split('_')[-1])
+        return 'https://www.facebook.com/groups/%s/posts/%s' % (self.group.id, self.id.split('_')[-1])
 
 class Comment(Base):
     @property
     def link(self):
         '''Generate a permalink to the comment. UNDOCUMENTED'''
-        return 'https://www.facebook.com/groups/%s/permalink/%s/?comment_id=%s' % (config.GROUP_ID, self.post.id.split('_')[-1], self.id.split('_')[-1])
+        return 'https://www.facebook.com/groups/%s/permalink/%s/?comment_id=%s' % (self.post.group.id, self.post.id.split('_')[-1], self.id.split('_')[-1])
