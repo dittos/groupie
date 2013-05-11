@@ -1,6 +1,7 @@
 import os
 import json
 import urllib
+import urlparse
 import requests
 
 import config
@@ -19,6 +20,16 @@ def update_pointer(group, ptr):
     if ptr is None:
         print 'Not updating...'
         return
+
+    scheme, netloc, path, query, frag = urlparse.urlsplit(ptr)
+    query = urlparse.parse_qs(query)
+    for k, v in query.items():
+        if k.startswith('__'):
+            del query[k]
+        else:
+            query[k] = v[0] # XXX
+    query = urllib.urlencode(query)
+    ptr = urlparse.urlunsplit((scheme, netloc, path, query, frag))
     with open(group.get_path('pointer'), 'w') as fp:
         fp.write(ptr)
 
@@ -60,6 +71,8 @@ def fetch_feed(group, initial_url=None):
         url = paging.get('next')
         if update_url is None:
             update_url = paging.get('previous')
+        if initial_url:
+            break
     return update_url
 
 def fetch_info(group):
