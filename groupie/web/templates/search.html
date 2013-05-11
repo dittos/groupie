@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ group.name }}{% if q %} &gt; Search: {{ q }}{% endif %}{% endblock %}
+
+{% macro print_post(post, show_comments=False) %}
+<div class="post">
+    <img src="http://graph.facebook.com/{{ post.from.id }}/picture?size=square" class="picture">
+    <span class="name">{{ post.from.name }}</span>
+    <span class="meta">{{ post.time|format_time }}{% if post.like_count %} &middot; {{ post.like_count }} likes{% endif %} &middot; <a href="{{ post.original_link }}" class="permalink">View original</a></span>
+    <p class="body">{{ post.message|urlize|nl2br }}</p>
+    {% if show_comments %}
+    <ul class="comments">
+    {% for comment in post.comments %}
+        <li>
+            <span class="comment-name">{{ comment.from.name }}</span>
+            <span class="body">{{ comment.message|urlize|nl2br }}</span> 
+            <a href="{{ comment.link }}" class="permalink">#</a>
+        </li>
+    {% endfor %}
+    </ul>
+    {% endif %}
+</div>
+{% endmacro %}
+
+{% block content %}
+<form method="get" action="" class="search-form">
+    <h1><img src="{{ group.icon }}"> <a href="{{ group.link }}">{{ group.name }}</a></h1>
+
+    <input type="search" size="30" name="q" value="{{ q }}" placeholder="Search...">
+
+{% if error %}
+    <p>{{ error }}</p>
+{% endif %}
+</form>
+
+{% if result %}
+<div class="result">
+<div class="sort">
+Sort by:
+<a href="{{ url_for('search', group_slug=group.slug, q=q, sort='popular') }}"{% if sort == 'popular' %} class="active"{% endif %}>Popularity</a> 
+<a href="{{ url_for('search', group_slug=group.slug, q=q, sort='new') }}"{% if sort == 'new' %} class="active"{% endif %}>Date</a>
+</div>
+
+{% for item in result %}
+    {% if item.model == 'Post' %}
+        {{ print_post(item, show_comments=True) }}
+    {% elif item.model == 'Comment' %}
+        {{ print_post(item.post, show_comments=True) }}
+    {% endif %}
+{% endfor %}
+
+{% if next_page or prev_page %}
+<div class="paging">
+{% if prev_page %}
+    <a href="{{ url_for('search', group_slug=group.slug, q=q, sort=sort, page=prev_page) }}" class="prev">&larr; Previous</a>
+{% endif %}
+{% if next_page %}
+    <a href="{{ url_for('search', group_slug=group.slug, q=q, sort=sort, page=next_page) }}" class="next">Next &rarr;</a>
+{% endif %}
+</div>
+{% endif %}
+</div>
+{% endif %}
+{% endblock %}
+
+{% block js %}
+{% if result %}
+<script type="text/javascript">
+function escapeRegExp(str) {
+    return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
+}
+var re = new RegExp(escapeRegExp({{ q|escape|tojson|safe }}), 'gi');
+var repl = "<span class='hl'>$&</span>";
+$('.body').each(function() {
+	var cell = this;
+	if (cell.innerHTML.match(re))
+	{
+		var content = []
+		for (var j = 0; j < cell.childNodes.length; j++)
+		{
+			var node = cell.childNodes[j]
+			if (node.nodeType == 3)
+			    // XXX: too hacky... :(
+				content.push($('<div />').text(node.nodeValue).html().replace(re, repl))
+			else if (node.nodeType == 1) {
+			    if (node.tagName == 'A')
+                    node.innerHTML = node.innerHTML.replace(re, repl);
+			    content.push(node.outerHTML);
+			}
+		}
+		cell.innerHTML = content.join('')
+	}
+});
+</script>
+{% endif %}
+{% endblock %}

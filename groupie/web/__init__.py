@@ -18,8 +18,15 @@ def format_time(time):
 def nl2br(text):
     return flask.Markup('<br>').join(text.splitlines())
 
+@app.route('/')
+def index():
+    groups = []
+    for slug in config.GROUPS:
+        groups.append(models.Group.get(slug))
+    return flask.render_template('index.html', groups=groups)
+
 @app.route('/<group_slug>')
-def index(group_slug):
+def search(group_slug):
     group = models.Group.get(group_slug)
     q = flask.request.args.get('q', '').strip()
     sort = flask.request.args.get('sort', 'popular').strip()
@@ -32,4 +39,4 @@ def index(group_slug):
         else:
             result, next_page = indexer.search(group, q, sort, page, limit)
 
-    return flask.render_template('index.html', group=group, q=q, sort=sort, error=error, result=result, page=page, prev_page=page - 1, next_page=next_page, limit=limit)
+    return flask.render_template('search.html', group=group, q=q, sort=sort, error=error, result=result, page=page, prev_page=page - 1, next_page=next_page, limit=limit)

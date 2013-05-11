@@ -1,139 +1,14 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>{{ group.name }}{% if q %} &gt; Search: {{ q }}{% endif %}</title>
-    <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
-    <style type="text/css">
-    body { margin: 0; color: #555; font-size: 14px; }
-    body, input { font-family: 'Open Sans', sans-serif; }
-    a { color: #34495e; }
-    .search-form { margin: 0; padding: 32px; text-align: center; background-color: #e7e6e7; border-bottom: 4px solid #ddd; }
-    h1 { color: #fff; font-weight: normal; font-size: 24px; margin: 0 0 16px; }
-    h1 a { color: #16a085; text-decoration: none; }
-    input {
-        font-size: 14px; border: none; border-radius: 4px; padding: 12px 16px; color: #444;
-        -moz-transition: box-shadow 0.2s ease-in;
-        -webkit-transition: box-shadow 0.2s ease-in;
-    }
-    input:focus { border-color: #16a085; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
-    .result { width: 640px; margin: 16px auto; }
-    .result .sort { float: right; color: #999; }
-    .result .sort a {
-        display: inline-block; text-decoration: none; border-radius: 4px; padding: 5px; color: #666;
-        font-weight: bold;
-        -moz-transition: background 0.1s ease-in;
-        -webkit-transition: background 0.1s ease-in;
-    }
-    .result .sort a:hover { background-color: #eee; }
-    .result .sort a.active { background-color: #16a085; color: #fff; }
-    .post { margin-bottom: 24px; overflow: hidden; clear: both; }
-    .post .picture { float: left; margin-right: 10px; border-radius: 25px; width: 50px; height: 50px; background-color: #eee; box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5); }
-    .post .name { display: block; font-weight: bold; color: #16a085; line-height: 22px; padding-top: 3px; }
-    .post .meta { display: block; color: #999; font-size: 13px; line-height: 22px; }
-    .post .meta a { color: #999; }
-    .post .body { line-height: 1.6; }
-    .post .comments { list-style: none; padding: 0; margin: 0; border-left: 4px solid #ddd; padding-left: 10px; font-size: 13px; }
-    .post .comments li { margin: 5px 0; }
-    .post .comment-name { color: #16a085; font-weight: bold; margin-right: 5px; }
-    .post .comments .permalink { margin-left: 5px; color: #16a085; text-decoration: none; }
-    .hl { display: inline-block; padding: 0 2px; border-radius: 2px; background-color: yellow; background-color: rgba(255, 255, 0, .5); }
-    .paging { overflow: hidden; }
-    .paging .prev { float: left; }
-    .paging .next { float: right; }
-    .footer { text-align: center; margin: 32px 0 16px; color: #999; }
-    </style>
-</head>
-<body>
-{% macro print_post(post, show_comments=False) %}
-<div class="post">
-    <img src="http://graph.facebook.com/{{ post.from.id }}/picture?size=square" class="picture">
-    <span class="name">{{ post.from.name }}</span>
-    <span class="meta">{{ post.time|format_time }}{% if post.like_count %} &middot; {{ post.like_count }} likes{% endif %} &middot; <a href="{{ post.original_link }}" class="permalink">View original</a></span>
-    <p class="body">{{ post.message|urlize|nl2br }}</p>
-    {% if show_comments %}
-    <ul class="comments">
-    {% for comment in post.comments %}
-        <li>
-            <span class="comment-name">{{ comment.from.name }}</span>
-            <span class="body">{{ comment.message|urlize|nl2br }}</span> 
-            <a href="{{ comment.link }}" class="permalink">#</a>
-        </li>
-    {% endfor %}
-    </ul>
-    {% endif %}
-</div>
-{% endmacro %}
+{% extends 'base.html' %}
 
-<form method="get" action="" class="search-form">
-    <h1><img src="{{ group.icon }}"> <a href="{{ group.link }}">{{ group.name }}</a></h1>
+{% block title %}Groups{% endblock %}
 
-    <input type="search" size="30" name="q" value="{{ q }}" placeholder="Search...">
-
-{% if error %}
-    <p>{{ error }}</p>
-{% endif %}
-</form>
-
-{% if result %}
-<div class="result">
-<div class="sort">
-Sort by:
-<a href="{{ url_for('index', group_slug=group.slug, q=q, sort='popular') }}"{% if sort == 'popular' %} class="active"{% endif %}>Popularity</a> 
-<a href="{{ url_for('index', group_slug=group.slug, q=q, sort='new') }}"{% if sort == 'new' %} class="active"{% endif %}>Date</a>
-</div>
-
-{% for item in result %}
-    {% if item.model == 'Post' %}
-        {{ print_post(item, show_comments=True) }}
-    {% elif item.model == 'Comment' %}
-        {{ print_post(item.post, show_comments=True) }}
-    {% endif %}
+{% block content %}
+<div class="content">
+<h2>Available Groups</h2>
+<ul class="groups">
+{% for group in groups %}
+    <li><img src="{{ group.icon }}"> <a href="{{ url_for('search', group_slug=group.slug) }}">{{ group.name }}</a></li>
 {% endfor %}
-
-{% if next_page or prev_page %}
-<div class="paging">
-{% if prev_page %}
-    <a href="{{ url_for('index', group_slug=group.slug, q=q, sort=sort, page=prev_page) }}" class="prev">&larr; Previous</a>
-{% endif %}
-{% if next_page %}
-    <a href="{{ url_for('index', group_slug=group.slug, q=q, sort=sort, page=next_page) }}" class="next">Next &rarr;</a>
-{% endif %}
+</ul>
 </div>
-{% endif %}
-</div>
-
-<script src="//ajax.aspnetcdn.com/ajax/jquery/jquery-1.9.1.min.js"></script>
-<script type="text/javascript">
-function escapeRegExp(str) {
-    return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
-}
-var re = new RegExp(escapeRegExp({{ q|escape|tojson|safe }}), 'gi');
-var repl = "<span class='hl'>$&</span>";
-$('.body').each(function() {
-	var cell = this;
-	if (cell.innerHTML.match(re))
-	{
-		var content = []
-		for (var j = 0; j < cell.childNodes.length; j++)
-		{
-			var node = cell.childNodes[j]
-			if (node.nodeType == 3)
-			    // XXX: too hacky... :(
-				content.push($('<div />').text(node.nodeValue).html().replace(re, repl))
-			else if (node.nodeType == 1) {
-			    if (node.tagName == 'A')
-                    node.innerHTML = node.innerHTML.replace(re, repl);
-			    content.push(node.outerHTML);
-			}
-		}
-		cell.innerHTML = content.join('')
-	}
-});
-</script>
-{% endif %}
-
-<div class="footer">
-Powered by <a href="https://github.com/dittos/groupie">Groupie</a> {{ GROUPIE_VERSION }}
-</div>
-</body>
-</html>
+{% endblock %}

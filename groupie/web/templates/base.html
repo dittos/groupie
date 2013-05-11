@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title %}{% endblock %}</title>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+    <style type="text/css">
+    body { margin: 0; color: #555; font-size: 14px; }
+    body, input { font-family: 'Open Sans', sans-serif; }
+    a { color: #34495e; }
+    .search-form { margin: 0; padding: 32px; text-align: center; background-color: #e7e6e7; border-bottom: 4px solid #ddd; }
+    h1 { color: #fff; font-weight: normal; font-size: 24px; margin: 0 0 16px; }
+    h1 a { color: #16a085; text-decoration: none; }
+    input {
+        font-size: 14px; border: none; border-radius: 4px; padding: 12px 16px; color: #444;
+        -moz-transition: box-shadow 0.2s ease-in;
+        -webkit-transition: box-shadow 0.2s ease-in;
+    }
+    input:focus { border-color: #16a085; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
+    .result { width: 640px; margin: 16px auto; }
+    .result .sort { float: right; color: #999; }
+    .result .sort a {
+        display: inline-block; text-decoration: none; border-radius: 4px; padding: 5px; color: #666;
+        font-weight: bold;
+        -moz-transition: background 0.1s ease-in;
+        -webkit-transition: background 0.1s ease-in;
+    }
+    .result .sort a:hover { background-color: #eee; }
+    .result .sort a.active { background-color: #16a085; color: #fff; }
+    .post { margin-bottom: 24px; overflow: hidden; clear: both; }
+    .post .picture { float: left; margin-right: 10px; border-radius: 25px; width: 50px; height: 50px; background-color: #eee; box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5); }
+    .post .name { display: block; font-weight: bold; color: #16a085; line-height: 22px; padding-top: 3px; }
+    .post .meta { display: block; color: #999; font-size: 13px; line-height: 22px; }
+    .post .meta a { color: #999; }
+    .post .body { line-height: 1.6; }
+    .post .comments { list-style: none; padding: 0; margin: 0; border-left: 4px solid #ddd; padding-left: 10px; font-size: 13px; }
+    .post .comments li { margin: 5px 0; }
+    .post .comment-name { color: #16a085; font-weight: bold; margin-right: 5px; }
+    .post .comments .permalink { margin-left: 5px; color: #16a085; text-decoration: none; }
+    .hl { display: inline-block; padding: 0 2px; border-radius: 2px; background-color: yellow; background-color: rgba(255, 255, 0, .5); }
+    .paging { overflow: hidden; }
+    .paging .prev { float: left; }
+    .paging .next { float: right; }
+    .content { width: 640px; margin: 16px auto; }
+    .groups { list-style: none; margin: 0; padding: 0; }
+    .groups li { font-weight: normal; font-size: 24px; margin: 0 0 16px; }
+    .groups li a { color: #16a085; text-decoration: none; }
+    .footer { text-align: center; margin: 32px 0 16px; color: #999; }
+    </style>
+</head>
+<body>
+{% block content %}{% endblock %}
+
+<script src="//ajax.aspnetcdn.com/ajax/jquery/jquery-1.9.1.min.js"></script>
+{% block js %}{% endblock %}
+
+<div class="footer">
+Powered by <a href="https://github.com/dittos/groupie">Groupie</a> {{ GROUPIE_VERSION }}
+</div>
+</body>
+</html>
