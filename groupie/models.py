@@ -33,7 +33,7 @@ class Group(Base):
     def get(slug):
         path = get_path(slug, 'info')
         if not os.path.exists(path):
-            raise GroupNotFound(name)
+            raise GroupNotFound(slug)
 
         with open(get_path(slug, 'info')) as fp:
             group = Group(json.load(fp))
