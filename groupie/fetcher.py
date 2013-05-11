@@ -56,7 +56,9 @@ def update_posts(group, posts):
             json.dump(post, fp)
 
 def fetch_feed(group, initial_url=None):
+    only_once = False
     if not initial_url:
+        only_once = True
         params = {'access_token': config.ACCESS_TOKEN, 'limit': str(100)}
         initial_url = 'https://graph.facebook.com/%s/feed?%s' % (urllib.quote(group.id), urllib.urlencode(params))
 
@@ -71,7 +73,7 @@ def fetch_feed(group, initial_url=None):
         url = paging.get('next')
         if update_url is None:
             update_url = paging.get('previous')
-        if initial_url:
+        if only_once:
             break
     return update_url
 
