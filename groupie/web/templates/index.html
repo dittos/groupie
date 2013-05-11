@@ -37,6 +37,9 @@
     .post .comment-name { color: #16a085; font-weight: bold; margin-right: 5px; }
     .post .comments .permalink { margin-left: 5px; color: #16a085; text-decoration: none; }
     .hl { display: inline-block; padding: 0 2px; border-radius: 2px; background-color: yellow; background-color: rgba(255, 255, 0, .5); }
+    .paging { overflow: hidden; }
+    .paging .prev { float: left; }
+    .paging .next { float: right; }
     .footer { text-align: center; margin: 32px 0 16px; color: #999; }
     </style>
 </head>
@@ -86,6 +89,17 @@ Sort by:
         {{ print_post(item.post, show_comments=True) }}
     {% endif %}
 {% endfor %}
+
+{% if next_page or prev_page %}
+<div class="paging">
+{% if prev_page %}
+    <a href="{{ url_for('index', group_slug=group.slug, q=q, sort=sort, page=prev_page) }}" class="prev">&larr; Previous</a>
+{% endif %}
+{% if next_page %}
+    <a href="{{ url_for('index', group_slug=group.slug, q=q, sort=sort, page=next_page) }}" class="next">Next &rarr;</a>
+{% endif %}
+</div>
+{% endif %}
 </div>
 
 <script src="//ajax.aspnetcdn.com/ajax/jquery/jquery-1.9.1.min.js"></script>

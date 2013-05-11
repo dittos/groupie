@@ -1,5 +1,6 @@
 import os
 import json
+import itertools
 
 from groupie import models
 
@@ -42,11 +43,19 @@ def popularity_func(obj):
 
     return obj.like_count + obj.comment_count * COMMENT_POP_WEIGHT
 
-def search(group, q, sort):
+def search(group, q, sort, page, limit):
     g = search_gen(group, q, sort)
     if sort == 'popular':
         g = sorted(g, key=popularity_func, reverse=True)
-    return g
+    start = (page - 1) * limit
+    end = start + limit + 1
+    result = list(itertools.islice(g, start, end))
+    if len(result) > limit:
+        result = result[:limit]
+        next_page = page + 1
+    else:
+        next_page = None
+    return result, next_page
 
 def search_gen(group, q, sort):
     q = q.lower()
